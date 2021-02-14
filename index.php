@@ -12,7 +12,7 @@
     </head>
     <body>
         <div class="container">
-            <div class="jumbotron mt-5">
+            <div class="jumbotron mt-3">
                 <div class="table-responsive">
                 <table id="tabla-empleados" class="table table-hover table-light">
                     <thead>
@@ -69,6 +69,7 @@
                                 <input type="tel" class="form-control" id="telefono-empleado" name="telefono-empleado">
                             </div>
                         <form>
+                        <div class="alert alert-danger" role="alert" id="alerta-form" style="display: none;"></div>
                         <div class="modal-footer">
                             <input style="display: none;" type="text" class="form-control" id="id-empleado" name="id-empleado">
                             <button style="display: none;" id="guardar-nuevo-empleado" type="button" class="btn btn-primary" onclick="Agregar()"> Agregar </button>
@@ -88,6 +89,7 @@
         $(this).find("form").trigger("reset");
         $("#guardar-nuevo-empleado").hide();
         $("#guardar-editar-empleado").hide();
+        $("#alerta-form").hide();
     });
 
     $("#nuevo-empleado").click(function() {
@@ -127,15 +129,41 @@
 
     function Agregar() {
         var datos = $("#form-empleado").serialize();
-        $.ajax({
-            url: 'controller.php',
-            data: {action: 'agregar-empleado', datos: datos},
-            type: 'POST',
-            success: function(result) {
-                $("#modal-empleado").modal("hide");
-                Cargar();
-            }
-        });
+        if (Validar()) {
+            $.ajax({
+                url: 'controller.php',
+                data: {action: 'agregar-empleado', datos: datos},
+                type: 'POST',
+                success: function(result) {
+                    $("#modal-empleado").modal("hide");
+                    Cargar();
+                }
+            });
+        }
+    }
+
+    function Validar() {
+        $("#alerta-form").show();
+        if ($("#nombre-empleado").val() == "" || $("#apellido-empleado").val() == "" || $("#email-empleado").val() == "" || $("#telefono-empleado").val() == "") {
+            $("#alerta-form").text("Por favor, rellene todos los campos");
+            return false;
+        }
+        if (isNaN($("#telefono-empleado").val())) {
+            $("#alerta-form").text("Por favor ingrese un número de teléfono válido");
+            return false;
+        }
+        if (/\d/.test($("#nombre-empleado").val())) {
+            $("#alerta-form").text("Por favor ingrese un nombre válido");
+            return false;
+        }
+        if (/\d/.test($("#apellido-empleado").val())) {
+            $("#alerta-form").text("Por favor ingrese un apellido válido");
+            return false;
+        }
+        else {
+            $("#alerta-form").hide();
+            return true;
+        }
     }
 
     function Eliminar(id_empleado) {
@@ -168,15 +196,16 @@
 
     $("#guardar-editar-empleado").click( function() {
         var datos = $("#form-empleado").serialize();
-        $.ajax({
-            url: 'controller.php',
-            data: {action: 'editar-empleado', datos: datos},
-            type: 'POST',
-            success: function(result) {
-                $("#modal-empleado").modal("hide");             
-                Cargar();
-            }
-        });
+        if (Validar()) {
+            $.ajax({
+                url: 'controller.php',
+                data: {action: 'editar-empleado', datos: datos},
+                type: 'POST',
+                success: function(result) {
+                    $("#modal-empleado").modal("hide");             
+                    Cargar();
+                }
+            });
+        }
     });
-
 </script>
